@@ -1,4 +1,3 @@
-// Global Variables
 let currentGender = 'female';
 let currentMetric = 'activity';
 let dataset = [];
@@ -8,13 +7,10 @@ const width = 800;
 const height = 800;
 const radius = 300;
 
-// Zoom settings
-let zoom = d3.zoom().scaleExtent([0.5, 5]).on('zoom', zoomed);
+let zoom = d3.zoom().scaleExtent([1, 2.5]).on('zoom', zoomed);
 
-// Color scale
 const colorScale = d3.scaleOrdinal(d3.schemeCategory10);
 
-// Entry point
 async function init() {
   dataset = await d3.json('processed_data.json');
   dataset.forEach(d => {
@@ -26,12 +22,9 @@ async function init() {
   renderClockChart();
 }
 
-// Main chart rendering function
 function renderClockChart() {
-  // Clear previous chart
   d3.select(".clock-chart").html('');
 
-  // Create SVG & zoom behavior
   const svg = d3.select(".clock-chart")
       .append('svg')
       .attr('width', width)
@@ -41,7 +34,6 @@ function renderClockChart() {
   const g = svg.append('g')
       .attr('transform', `translate(${width/2},${height/2})`);
 
-  // Add title
   svg.append('text')
       .attr('class', 'chart-title')
       .attr('x', width/2)
@@ -58,7 +50,6 @@ function renderClockChart() {
         } Mice`
       );
 
-  // Filter data
   const validData = dataset.filter(d =>
       d.gender === currentGender && 
       d[currentMetric] !== null && 
@@ -67,7 +58,6 @@ function renderClockChart() {
       !isNaN(d.minute)
   );
 
-  // Group data by (mouseId, hour)
   const hourlyData = d3.groups(validData, 
       d => d.mouseId,
       d => Math.floor(d.minute / 60)
@@ -82,21 +72,16 @@ function renderClockChart() {
       return [mouseId, hourMap];
   });
 
-  // Scale setup
-  // For "activity", domain: [0, 34]
-  // For "temp", domain: [18, 19.5]
   const maxValue = currentMetric === 'activity' ? 34 : 19.5;
   const minValue = currentMetric === 'activity' ? 0 : 18;
   const valueScale = d3.scaleLinear()
       .domain([minValue, maxValue])
       .range([50, radius]);
 
-  // Draw circles for radial grid
   const axisCircles = [0.25, 0.5, 0.75, 1];
   axisCircles.forEach(percentage => {
       const r = radius * percentage;
       
-      // Dashed circle
       g.append('circle')
           .attr('r', r)
           .attr('fill', 'none')
@@ -176,18 +161,16 @@ function renderClockChart() {
           });
   });
 
-  // Clear selection on background click
   svg.on('click', () => {
       clearAllSelections();
   });
 
-  // Build legend
   const legend = d3.select('.legend').html('');
-  legend.append('div')
-      .style('text-align', 'center')
-      .style('margin-bottom', '10px')
-      .style('font-weight', 'bold')
-      .text(`Mouse ID Legend (Click to highlight, hover to focus)`);
+//   legend.append('div')
+//       .style('text-align', 'center')
+//       .style('margin-bottom', '10px')
+//       .style('font-weight', 'bold')
+//       .text(`Mouse ID Legend (Click to highlight, hover to focus)`);
 
   hourlyData.forEach(([mouseId]) => {
       const item = legend.append('div')
@@ -222,7 +205,7 @@ function zoomed(event) {
 }
 
 function showTooltip(event, mouseId, data, hour) {
-    hideTooltip(); // Remove any existing tooltips before creating a new one
+    hideTooltip();
 
     const tooltip = d3.select('body').append('div')
         .attr('class', 'tooltip')
