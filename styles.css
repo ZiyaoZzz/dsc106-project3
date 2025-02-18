@@ -118,5 +118,35 @@ body {
     border-radius: 50%;
     display: inline-block;
   }
+.search-container {
+  display: flex;
+  gap: 5px;
+  align-items: center;
+  position: relative;
+}
+
+#mouseSearch {
+  padding: 8px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 14px;
+  width: 150px;
+  transition: border-color 0.3s;
+}
+
+#mouseSearch:focus {
+  outline: none;
+  border-color: #4CAF50;
+  box-shadow: 0 0 0 2px rgba(76, 175, 80, 0.1);
+}
+
+.search-container button {
+  white-space: nowrap;
+}
+
+#mouseSearch:focus {
+  outline: none;
+  border-color: #4CAF50;
+}
 
   
