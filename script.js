@@ -12,15 +12,29 @@ let zoom = d3.zoom().scaleExtent([1, 2.5]).on('zoom', zoomed);
 const colorScale = d3.scaleOrdinal(d3.schemeCategory10);
 
 async function init() {
-  dataset = await d3.json('processed_data.json');
-  dataset.forEach(d => {
-      d.time = timeParser(d.time);
-      d.activity = +d.activity;
-      d.temp = +d.temp;
-      d.minute = +d.minute;
-  });
-  renderClockChart();
+  try {
+    const response = await fetch('https://ziyaozzz.github.io/dsc106-project3/processed_data_min.json.gz');
+    const arrayBuffer = await response.arrayBuffer();
+
+    // Decompress using pako
+    const text = new TextDecoder("utf-8").decode(pako.inflate(arrayBuffer));
+
+    // Parse JSON
+    dataset = JSON.parse(text);
+
+    dataset.forEach(d => {
+        d.time = timeParser(d.time);
+        d.activity = +d.activity;
+        d.temp = +d.temp;
+        d.minute = +d.minute;
+    });
+
+    renderClockChart();
+  } catch (error) {
+    console.error("Error fetching JSON:", error);
+  }
 }
+
 
 function renderClockChart() {
   d3.select(".clock-chart").html('');
