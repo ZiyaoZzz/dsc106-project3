@@ -283,4 +283,68 @@ function toggleMetric() {
   renderClockChart();
 }
 
+
+function searchMouse() {
+  const searchInput = document.getElementById('mouseSearch');
+  const searchValue = searchInput.value.trim().toLowerCase();
+  
+  if (!searchValue) {
+    // 如果搜索框为空，显示所有数据
+    d3.selectAll('.mouse-line').style('display', 'block');
+    clearAllSelections();
+    return;
+  }
+
+  // 转换输入格式
+  const searchId = searchValue.startsWith('f') ? searchValue : `f${searchValue}`;
+  
+  // 获取当前显示的鼠标ID
+  const validData = dataset.filter(d => d.gender === currentGender);
+  const availableMouseIds = [...new Set(validData.map(d => d.mouseId))];
+
+  // 查找匹配的鼠标ID
+  const matchedId = availableMouseIds.find(id => id.toLowerCase() === searchId);
+
+  if (matchedId) {
+    // 隐藏所有数据线
+    d3.selectAll('.mouse-line').style('display', 'none');
+    // 只显示搜索到的老鼠数据线
+    d3.select(`#mouse-${matchedId}`).style('display', 'block');
+    toggleMouseSelection(matchedId);
+  } else {
+    alert(`未找到ID为 ${searchValue} 的老鼠！`);
+    // 显示所有数据线
+    d3.selectAll('.mouse-line').style('display', 'block');
+    clearAllSelections();
+  }
+}
+
+// 确保DOM加载完成后绑定事件
+document.addEventListener('DOMContentLoaded', function() {
+  const searchInput = document.getElementById('mouseSearch');
+  
+  // 添加回车键事件监听
+  searchInput.addEventListener('keypress', function(e) {
+    if (e.key === 'Enter') {
+      e.preventDefault(); // 防止表单提交
+      searchMouse();
+    }
+  });
+
+  // 添加输入建议功能
+  searchInput.addEventListener('input', function() {
+    const value = this.value.trim().toLowerCase();
+    if (!value) return;
+
+    const searchId = value.startsWith('f') ? value : `f${value}`;
+    const validData = dataset.filter(d => d.gender === currentGender);
+    const availableMouseIds = [...new Set(validData.map(d => d.mouseId))];
+    
+    // 如果输入的值完全匹配某个ID，自动触发搜索
+    if (availableMouseIds.some(id => id.toLowerCase() === searchId)) {
+      searchMouse();
+    }
+  });
+});
+
 init();
