@@ -284,26 +284,27 @@ function toggleMetric() {
 }
 
 
-function searchMouse() {
+function handleSearch() {
   const searchInput = document.getElementById('mouseSearch');
   const searchValue = searchInput.value.trim().toLowerCase();
   
   if (!searchValue) {
-    // 如果搜索框为空，显示所有数据
     d3.selectAll('.mouse-line').style('display', 'block');
     clearAllSelections();
     return;
   }
 
-  // 转换输入格式
-  const searchId = searchValue.startsWith('f') ? searchValue : `f${searchValue}`;
-  
-  // 获取当前显示的鼠标ID
-  const validData = dataset.filter(d => d.gender === currentGender);
-  const availableMouseIds = [...new Set(validData.map(d => d.mouseId))];
+  // 获取当前显示的所有鼠标ID（从legend中获取）
+  const availableMouseIds = Array.from(document.querySelectorAll('.legend-item'))
+    .map(item => item.textContent.match(/Mouse ([mf]\d+)/)[1]);
+
+  // 构建搜索模式
+  const searchId = searchValue.startsWith('m') || searchValue.startsWith('f') ? 
+    searchValue : 
+    `${currentGender.charAt(0)}${searchValue}`;
 
   // 查找匹配的鼠标ID
-  const matchedId = availableMouseIds.find(id => id.toLowerCase() === searchId);
+  const matchedId = availableMouseIds.find(id => id.toLowerCase() === searchId.toLowerCase());
 
   if (matchedId) {
     // 隐藏所有数据线
@@ -312,39 +313,54 @@ function searchMouse() {
     d3.select(`#mouse-${matchedId}`).style('display', 'block');
     toggleMouseSelection(matchedId);
   } else {
-    alert(`未找到ID为 ${searchValue} 的老鼠！`);
-    // 显示所有数据线
+    alert(`Mouse ID "${searchValue}" not found!`);
     d3.selectAll('.mouse-line').style('display', 'block');
     clearAllSelections();
   }
 }
 
-// 确保DOM加载完成后绑定事件
-document.addEventListener('DOMContentLoaded', function() {
+function resetSearch() {
   const searchInput = document.getElementById('mouseSearch');
+  searchInput.value = ''; // 清空搜索框
+  d3.selectAll('.mouse-line').style('display', 'block');
+  clearAllSelections();
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+  init();
   
-  // 添加回车键事件监听
-  searchInput.addEventListener('keypress', function(e) {
-    if (e.key === 'Enter') {
-      e.preventDefault(); // 防止表单提交
-      searchMouse();
-    }
-  });
+  const searchInput = document.getElementById('mouseSearch');
+  if (searchInput) {
+    // 添加回车键事件监听
+    searchInput.addEventListener('keypress', function(e) {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        handleSearch();
+      }
+    });
 
-  // 添加输入建议功能
-  searchInput.addEventListener('input', function() {
-    const value = this.value.trim().toLowerCase();
-    if (!value) return;
+    // 添加输入建议功能
+    searchInput.addEventListener('input', function() {
+      const value = this.value.trim().toLowerCase();
+      if (!value) return;
 
-    const searchId = value.startsWith('f') ? value : `f${value}`;
-    const validData = dataset.filter(d => d.gender === currentGender);
-    const availableMouseIds = [...new Set(validData.map(d => d.mouseId))];
-    
-    // 如果输入的值完全匹配某个ID，自动触发搜索
-    if (availableMouseIds.some(id => id.toLowerCase() === searchId)) {
-      searchMouse();
-    }
-  });
+      const searchId = value.startsWith('f') ? value : `f${value}`;
+      const validData = dataset.filter(d => d.gender === currentGender);
+      const availableMouseIds = [...new Set(validData.map(d => d.mouseId))];
+      
+      // 如果输入的值完全匹配某个ID，自动触发搜索
+      if (availableMouseIds.some(id => id.toLowerCase() === searchId)) {
+        handleSearch();
+      }
+    });
+  }
+
+  // 添加reset按钮的事件监听器
+  const resetButton = document.querySelector('.search-container button');
+  if (resetButton) {
+    resetButton.addEventListener('click', resetSearch);
+  }
 });
 
-init();
+// 删除重复的init()调用
+// init();
