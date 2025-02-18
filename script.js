@@ -12,7 +12,7 @@ let zoom = d3.zoom().scaleExtent([1, 2.5]).on('zoom', zoomed);
 const colorScale = d3.scaleOrdinal(d3.schemeCategory10);
 
 async function init() {
-  dataset = await d3.json('processed_data.json');
+  dataset = await d3.json('../processed_data.json');
   dataset.forEach(d => {
       d.time = timeParser(d.time);
       d.activity = +d.activity;
